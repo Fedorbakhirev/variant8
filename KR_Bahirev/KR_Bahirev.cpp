@@ -21,7 +21,8 @@ wstring getString(FILE* file) {
 
 int main()
 {
-    setlocale(0, "");
+    setlocale(LC_ALL, ".866");
+
     AppointmentSystem system = AppointmentSystem(vector<Appointment>(0));
     wstring instructions = L"Добро пожаловать!\n"
         "Чтобы считать данные с файла, введите:\n\"read <имя файла (только англ)>\".\n\n"
@@ -34,6 +35,7 @@ int main()
     wstring surname, name, fathername, policy;
     int year, month, day, hour;
     if (temp == L"read") {
+        setlocale(LC_ALL, "");
         string filename;
         cin >> filename;
         FILE* file;
@@ -76,6 +78,8 @@ int main()
             wcin >> temp;
         }
     }
+
+    setlocale(LC_ALL, ".866");
     if (system.validate()) {
         wcout << L"Данные прошли проверку. Текущая таблица:\n";
         wcout << system.toString();
@@ -131,6 +135,7 @@ int main()
             }
         }
         else if (cmd == L"save") {
+            setlocale(LC_ALL, "");
             string filename;
             cin >> filename;
             FILE* file;
@@ -138,6 +143,7 @@ int main()
             fwprintf(file, system.toFile().data());
             fclose(file);
             wcout << L"Успешно.\n";
+            setlocale(LC_ALL, ".866");
         }
     }
 
