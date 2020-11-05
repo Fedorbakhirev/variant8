@@ -3,11 +3,25 @@
 #include <vector>
 #include "appointmentsystem.h"
 #include <filesystem>
+
 using namespace std;
+
+
+wstring getString(FILE* file) {
+    wchar_t wc;
+    wstring ws = L"";
+    wc = fgetwc(file);
+    while (wc != WEOF && wc != '\n' && wc != ' ' && wc != '\r') {
+        wchar_t wchar[2] = { wc, '\0' };
+        ws.append(wchar);
+        wc = fgetwc(file);
+    }
+    return ws;
+}
+
 int main()
 {
-    setlocale(LC_ALL, ".866");
-
+    setlocale(0, "");
     AppointmentSystem system = AppointmentSystem(vector<Appointment>(0));
     wstring instructions = L"Добро пожаловать!\n"
         "Чтобы считать данные с файла, введите:\n\"read <имя файла (только англ)>\".\n\n"
@@ -22,22 +36,30 @@ int main()
     if (temp == L"read") {
         string filename;
         cin >> filename;
-        wifstream  win(filename);
+        FILE* file;
+        fopen_s(&file, filename.data(), "r, ccs=UTF-8");
         system = AppointmentSystem(vector<Appointment>(0));
-        setlocale(LC_ALL, ".1251");
-        win >> temp;
+
+        temp = getString(file);
+        wifstream win(filename);
         while (temp != L"end_line") {
             surname = temp;
-            win >> name >> fathername >> policy >> year >> month >> day >> hour;
+            name = getString(file);
+            fathername = getString(file);
+            policy = getString(file);
+            year = stoi(getString(file));
+            month = stoi(getString(file));
+            day = stoi(getString(file));
+            hour = stoi(getString(file));
             Date date = Date(year, month, day, hour);
             Patient patient = Patient(surname, name, fathername, policy);
             Appointment appointment = Appointment(date, patient);
             if (!system.addAppointment(appointment)) {
                 wcout << L"Ошибка. Время записи уже занято.\n";
             }
-            win >> temp;
+            temp = getString(file);
         }
-        setlocale(LC_ALL, ".866");
+
     }
     else {
         system = AppointmentSystem(vector<Appointment>(0));
@@ -109,15 +131,16 @@ int main()
             }
         }
         else if (cmd == L"save") {
-            setlocale(LC_ALL, ".1251");
             string filename;
             cin >> filename;
-            wofstream  wout(filename);
-            wout << system.toFile();
-            wout.close();
+            FILE* file;
+            fopen_s(&file, filename.data(), "w, ccs=UTF-8");
+            fwprintf(file, system.toFile().data());
+            fclose(file);
             wcout << L"Успешно.\n";
-            setlocale(LC_ALL, ".866");
         }
     }
 
 }
+
+
